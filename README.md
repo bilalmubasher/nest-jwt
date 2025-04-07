@@ -1,31 +1,40 @@
-<!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-[![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Authentication Development Notes
 
-## JWT Signing and Verification
+1. Create `auth` and `user` modules.
 
-create auth and user modules
+2. In `UsersService`:
+   - Find a specific user.
+   - Export `UserService` to make it accessible outside the module.
 
-In UsersService, find a specific user
-Export UserService so we can see it outside the module
+3. In `AuthService`:
+   - Write a `signIn` function to:
+     - Retrieve a user from `UserService`.
+     - Verify the user’s password.
+   - Use `saltRounds` (a variable determining bcrypt hash processing time; a good value is 10).
 
-Write sign-in function in authService, which will reterieve user from UserService, verify its password.
-saltRounds is a variable that determines how much processing time is needed to calculate a single bcrypt hash(good value is 10).
+4. Define the login route in `AuthController`.
 
-Now define the login route in authcontroller
+5. In `auth.service.ts` (inside the `auth` folder):
+   - Inject the `JwtService`.
+   - Update the `signIn` method to generate a JWT token.
 
-Open the auth.service.ts file in the auth folder, inject the JwtService, and update the signIn method to generate a JWT token
+6. Prefer `signAsync` for signing:
+   - Signs asynchronously to avoid blocking the event loop.
 
-signAsync( sign asynchronous way and not block the event loop) preferable
+7. In `AuthModule`:
+   - Register the JWT module.
+   - Set an expiry time and add a secret key for signing.
 
-Register JWT module in auth module and set expiry time and add secret key to sign it.
+8. Implement authentication protection:
+   - Create a guard to protect endpoints lacking tokens in headers.
+   - Register the auth guard to secure protected routes.
 
-After that, implement guard to guard the endpoint who don't have tokens in headers.
-Now - register auth guard to protect protected routes.
-
-JWT Signature verification:-
-
-HMACSHA256(
+9. JWT Signature Verification:
+   - **Formula**:
+  HMACSHA256(
   base64UrlEncode(header) + "." +
   base64UrlEncode(payload),
   your-secret
 )
+
+- **How it works**: Verifies the token by hashing the header and payload with the secret; the result must match the token’s signature.
